@@ -1,3 +1,4 @@
+// swift-tools-version: 5.9
 import PackageDescription
 
 let package = Package(
@@ -11,8 +12,8 @@ let package = Package(
     targets: [
         .binaryTarget(
             name: "DigidSDK",
-            url: "https://github.com/digid-mexico/sdk-ios/releases/download/1.1.0/DigidSDK-1.1.0.xcframework.zip",
-            checksum: "9b00609989b8efbe00e34bb682683c401eb03ef1fb8d195c6f257046fb30cb58" // DigidSDK
+            url: "https://github.com/digid-mexico/sdk-ios/releases/download/1.1.1/DigidSDK-1.1.1.xcframework.zip",
+            checksum: "9b00609989b8efbe00e34bb682683c401eb03ef1fb8d195c6f257046fb30cb58"
         ),
         .binaryTarget(
             name: "DiditSDKBinary",
@@ -26,11 +27,7 @@ let package = Package(
         ),
         .target(
             name: "DigidSDKBundle",
-            dependencies: [
-                "DigidSDK",
-                "DiditSDKBinary",
-                "OpenSSLBinary"
-            ],
+            dependencies: ["DigidSDK", "DiditSDKBinary", "OpenSSLBinary"],
             path: "Sources/DigidSDKBundle"
         )
     ]
