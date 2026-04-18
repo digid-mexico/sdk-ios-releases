@@ -7,7 +7,7 @@ let package = Package(
         .iOS(.v14)
     ],
     products: [
-        .library(name: "DigidSDK", targets: ["DigidSDKBundle"])
+        .library(name: "DigidSDK", targets: ["DigidSDK", "DiditSDKBinary", "OpenSSLBinary"])
     ],
     targets: [
         .binaryTarget(
@@ -24,11 +24,6 @@ let package = Package(
             name: "OpenSSLBinary",
             url: "https://github.com/didit-protocol/sdk-ios/releases/download/3.2.9/OpenSSL.xcframework.zip",
             checksum: "85cc0052584d083df65e823ca94c4b15e8c1edc3e21b58a4cbcff6ae6b06e20c"
-        ),
-        .target(
-            name: "DigidSDKBundle",
-            dependencies: ["DigidSDK", "DiditSDKBinary", "OpenSSLBinary"],
-            path: "Sources/DigidSDKBundle"
         )
     ]
 )
