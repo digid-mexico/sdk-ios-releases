@@ -10,7 +10,7 @@ El SDK se distribuye como un **XCFramework binario** vía Swift Package Manager.
 
 1. **File → Add Package Dependencies…**
 2. URL: `https://github.com/digid-mexico/sdk-ios-releases`
-3. Regla de versión: **Exact → 1.5.0** (o *Up to Next Major Version* desde 1.5.0).
+3. Regla de versión: **Exact → 1.8.0** (o *Up to Next Major Version* desde 1.8.0).
 4. Agrega el producto **DigidSDK** a tu *app target*.
 
 ### Opción B — Package.swift (proyectos SPM puros)
@@ -23,7 +23,7 @@ let package = Package(
     name: "MiApp",
     platforms: [.iOS(.v14)],
     dependencies: [
-        .package(url: "https://github.com/digid-mexico/sdk-ios-releases", exact: "1.5.0")
+        .package(url: "https://github.com/digid-mexico/sdk-ios-releases", exact: "1.8.0")
     ],
     targets: [
         .target(name: "MiApp", dependencies: [
@@ -60,11 +60,20 @@ Consulta el **Manual de Integración** para el detalle de los módulos KYC y de 
 
 | Versión | Fecha      | Novedades                                                                          |
 |---------|------------|------------------------------------------------------------------------------------|
+| 1.8.0   | 2026-08-03 | Pinch-zoom en la lectura del documento. La pantalla de T&C ahora la dicta el backend por cliente (sin cambios de integración). `addressData` agrega `municipio`, `colonia`, `numeroExterior`, `cruzamientos` y `parsingConfidence`. **Versión recomendada.** |
+| 1.7.0   | 2026-07-21 | `KYCResult.sessionId` devuelve el identificador que envía el integrador. Nuevo error `duplicateSessionId` cuando ese id ya se usó. |
 | 1.5.0   | 2026-07-02 | Resultado KYC ampliado, descarga automática de imágenes y video, control de logs.  |
 | 1.4.1   | 2026-07-01 | Distribución como framework dinámico (compatibilidad con SDK de iOS 26+)            |
 | 1.4.0   | 2026-06    | Enriquecimiento del resultado KYC                                                  |
 
 > El historial completo está disponible en la pestaña **Releases** de este repositorio. Conserva siempre las versiones anteriores para clientes que fijen una versión específica.
+
+## Novedades de la 1.8.0
+
+- **Zoom en el visor de documentos**: pinch para acercar hasta 4x en la vista de lectura antes de firmar. El progreso de lectura no retrocede al hacer zoom.
+- **Términos y Condiciones por cliente**: Digid puede deshabilitar la pantalla de T&C del SDK para tu `clientId` (útil si tu app ya muestra términos propios). No requiere ningún cambio de integración; contacta a Digid para configurarlo.
+- **Domicilio desglosado**: `KYCAddress` agrega `municipio`, `colonia`, `numeroExterior`, `cruzamientos` y `parsingConfidence`, también presentes en el JSON de `toJSON()` dentro de `address_data`.
+- Ajustes visuales en la aplicación de firmas.
 
 ## Novedades de la 1.5.0
 
