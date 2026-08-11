@@ -10,7 +10,7 @@ El SDK se distribuye como un **XCFramework binario** vía Swift Package Manager.
 
 1. **File → Add Package Dependencies…**
 2. URL: `https://github.com/digid-mexico/sdk-ios-releases`
-3. Regla de versión: **Exact → 1.8.0** (o *Up to Next Major Version* desde 1.8.0).
+3. Regla de versión: **Exact → 1.9.0** (o *Up to Next Major Version* desde 1.9.0).
 4. Agrega el producto **DigidSDK** a tu *app target*.
 
 ### Opción B — Package.swift (proyectos SPM puros)
@@ -23,7 +23,7 @@ let package = Package(
     name: "MiApp",
     platforms: [.iOS(.v14)],
     dependencies: [
-        .package(url: "https://github.com/digid-mexico/sdk-ios-releases", exact: "1.8.0")
+        .package(url: "https://github.com/digid-mexico/sdk-ios-releases", exact: "1.9.0")
     ],
     targets: [
         .target(name: "MiApp", dependencies: [
@@ -40,7 +40,19 @@ let package = Package(
 <string>Se requiere la cámara para verificar tu identidad y capturar tu firma.</string>
 <key>NSMicrophoneUsageDescription</key>
 <string>Se requiere el micrófono para el video de prueba de vida.</string>
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>Se requiere tu ubicación para registrarla como constancia al firmar documentos que así lo exigen.</string>
 ```
+
+> `NSLocationWhenInUseUsageDescription` es obligatoria si alguno de tus documentos usa `required_gps`. Sin ella iOS **ignora la solicitud de permiso en silencio**: no aparece el diálogo, no llega ninguna lectura, y el firmante se topa con un error al final sin ninguna pista. Desde la 1.9.0 el SDK lo detecta y lo reporta en consola con `verboseLogging` activo.
+
+Si usas Xcode 13 o posterior sin archivo `Info.plist`, agrégala en **Target → Info → Custom iOS Target Properties**, o como *build setting* `INFOPLIST_KEY_NSLocationWhenInUseUsageDescription`.
+
+### Manifiesto de privacidad
+
+Desde la 1.9.0 el SDK incluye su propio `PrivacyInfo.xcprivacy`, así que ya no recibirás avisos de App Store Connect por las APIs que usa. Declara los datos que el SDK recolecta (fotos y video, biométricos faciales, nombre, domicilio, identificador de usuario y ubicación precisa cuando el documento la exige), todos con propósito de funcionalidad de la app y sin seguimiento publicitario.
+
+Sigue siendo tu responsabilidad declarar esos mismos datos en la **Nutrition Label** de tu ficha de App Store.
 
 ## Inicialización
 
@@ -60,13 +72,32 @@ Consulta el **Manual de Integración** para el detalle de los módulos KYC y de 
 
 | Versión | Fecha      | Novedades                                                                          |
 |---------|------------|------------------------------------------------------------------------------------|
-| 1.8.0   | 2026-08-03 | Pinch-zoom en la lectura del documento. La pantalla de T&C ahora la dicta el backend por cliente (sin cambios de integración). `addressData` agrega `municipio`, `colonia`, `numeroExterior`, `cruzamientos` y `parsingConfidence`. **Versión recomendada.** |
+| 1.9.0   | 2026-08-11 | `isApproved` ahora exige que el servidor haya aprobado. Firma con ubicación (`required_gps`). Manifiesto de privacidad incluido. Corrige un cierre inesperado al capturar la selfie de firma. Pantallas del motor de verificación en español. **Versión recomendada.** |
+| 1.8.0   | 2026-08-03 | Pinch-zoom en la lectura del documento. La pantalla de T&C ahora la dicta el backend por cliente (sin cambios de integración). `addressData` agrega `municipio`, `colonia`, `numeroExterior`, `cruzamientos` y `parsingConfidence`. |
 | 1.7.0   | 2026-07-21 | `KYCResult.sessionId` devuelve el identificador que envía el integrador. Nuevo error `duplicateSessionId` cuando ese id ya se usó. |
 | 1.5.0   | 2026-07-02 | Resultado KYC ampliado, descarga automática de imágenes y video, control de logs.  |
 | 1.4.1   | 2026-07-01 | Distribución como framework dinámico (compatibilidad con SDK de iOS 26+)            |
 | 1.4.0   | 2026-06    | Enriquecimiento del resultado KYC                                                  |
 
 > El historial completo está disponible en la pestaña **Releases** de este repositorio. Conserva siempre las versiones anteriores para clientes que fijen una versión específica.
+
+## Novedades de la 1.9.0
+
+### Correcciones que cambian resultados
+
+- **`isApproved` ya no puede dar un falso positivo.** Antes combinaba solo los tres sub-checks biométricos, así que un rechazo por rostro duplicado, dispositivo o IP en lista de bloqueo, o AML llegaba con los tres en `true` y la propiedad devolvía aprobado. Ahora exige además que el servidor haya dictado `Approved`. **No cambia de firma, pero devuelve `false` en casos donde antes devolvía `true`**: si tu backend registraba aprobaciones a partir de esta propiedad, revisa tus registros históricos.
+- **Los puntajes del resultado parcial ya no se inventan.** Cuando el servidor no alcanza a entregar los datos completos, `faceMatchScore` y `livenessScore` llegan en `0.0` en vez de un `100.0` fabricado. Usa `ready` para distinguir un resultado completo de uno degradado — antes venía siempre en `true`, ahora refleja la realidad.
+- **Respuestas parciales del servidor ya no rompen el resultado.** Un campo nulo o ausente en el bloque de verificación tumbaba la decodificación completa y el SDK reportaba un error genérico en vez de entregar el resultado.
+
+### Novedades
+
+- **Firma con ubicación**: los documentos con `required_gps` ya se pueden firmar. El SDK verifica que declares `NSLocationWhenInUseUsageDescription`, solicita el permiso, y corta antes de enviar si no consigue la lectura, con opción de reintentar o abrir Ajustes. Antes el servidor respondía con error y revertía la operación **después** de que el usuario aceptó cada punto de firma.
+- **Manifiesto de privacidad** (`PrivacyInfo.xcprivacy`) incluido en el XCFramework. Elimina los avisos de App Store Connect al subir tu build, incluido el ITMS-91053 por APIs que tu código nunca invoca.
+- **Pantallas del motor de verificación en español**. Antes salían en inglés por el idioma por defecto del proveedor.
+
+### Correcciones de estabilidad
+
+- **Cierre inesperado al capturar la selfie de firma**: el callback de la cámara tocaba la interfaz desde una cola interna de AVFoundation. Podía producir corrupción visual o un cierre de tu app.
 
 ## Novedades de la 1.8.0
 
