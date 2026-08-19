@@ -10,7 +10,7 @@ El SDK se distribuye como un **XCFramework binario** vía Swift Package Manager.
 
 1. **File → Add Package Dependencies…**
 2. URL: `https://github.com/digid-mexico/sdk-ios-releases`
-3. Regla de versión: **Exact → 1.9.0** (o *Up to Next Major Version* desde 1.9.0).
+3. Regla de versión: **Exact → 1.10.0** (o *Up to Next Major Version* desde 1.10.0).
 4. Agrega el producto **DigidSDK** a tu *app target*.
 
 ### Opción B — Package.swift (proyectos SPM puros)
@@ -23,7 +23,7 @@ let package = Package(
     name: "MiApp",
     platforms: [.iOS(.v14)],
     dependencies: [
-        .package(url: "https://github.com/digid-mexico/sdk-ios-releases", exact: "1.9.0")
+        .package(url: "https://github.com/digid-mexico/sdk-ios-releases", exact: "1.10.0")
     ],
     targets: [
         .target(name: "MiApp", dependencies: [
@@ -72,7 +72,8 @@ Consulta el **Manual de Integración** para el detalle de los módulos KYC y de 
 
 | Versión | Fecha      | Novedades                                                                          |
 |---------|------------|------------------------------------------------------------------------------------|
-| 1.9.0   | 2026-08-11 | `isApproved` ahora exige que el servidor haya aprobado. Firma con ubicación (`required_gps`). Manifiesto de privacidad incluido. Corrige un cierre inesperado al capturar la selfie de firma. Pantallas del motor de verificación en español. **Versión recomendada.** |
+| 1.10.0  | 2026-08-19 | `DigidTheme.accentColor` para teñir las ilustraciones (opt-in). Al finalizar la firma se espera la lectura de ubicación en vuelo en vez de mostrar un error inmediato; entrega más rápida en interiores. Sin cambios breaking. **Versión recomendada.** |
+| 1.9.0   | 2026-08-11 | `isApproved` ahora exige que el servidor haya aprobado. Firma con ubicación (`required_gps`). Manifiesto de privacidad incluido. Corrige un cierre inesperado al capturar la selfie de firma. Pantallas del motor de verificación en español. |
 | 1.8.0   | 2026-08-03 | Pinch-zoom en la lectura del documento. La pantalla de T&C ahora la dicta el backend por cliente (sin cambios de integración). `addressData` agrega `municipio`, `colonia`, `numeroExterior`, `cruzamientos` y `parsingConfidence`. |
 | 1.7.0   | 2026-07-21 | `KYCResult.sessionId` devuelve el identificador que envía el integrador. Nuevo error `duplicateSessionId` cuando ese id ya se usó. |
 | 1.5.0   | 2026-07-02 | Resultado KYC ampliado, descarga automática de imágenes y video, control de logs.  |
@@ -80,6 +81,28 @@ Consulta el **Manual de Integración** para el detalle de los módulos KYC y de 
 | 1.4.0   | 2026-06    | Enriquecimiento del resultado KYC                                                  |
 
 > El historial completo está disponible en la pestaña **Releases** de este repositorio. Conserva siempre las versiones anteriores para clientes que fijen una versión específica.
+
+## Novedades de la 1.10.0
+
+### Color de acento en las ilustraciones — opt-in
+
+`DigidTheme` agrega `accentColor`, que tiñe los elementos decorativos verde azulado de las ilustraciones del SDK (hoy, la pantalla de Términos y Condiciones):
+
+```swift
+DigidTheme(
+    primaryColor: UIColor(hex: "#1A3C6E") ?? .systemBlue,
+    secondaryColor: UIColor(hex: "#2D8CF0") ?? .blue,
+    backgroundColor: .white,
+    accentColor: UIColor(hex: "#1A3C6E") ?? .systemTeal   // opcional
+)
+```
+
+> **Es opt-in a propósito**: si no lo configuras, las ilustraciones conservan su color original (`#6AC1B4`) — actualizar el SDK no cambia nada visualmente. Los botones y cabeceras siguen usando `primaryColor`; si quieres que la ilustración acompañe a tu tema, pasa `accentColor` explícitamente.
+
+### Correcciones
+
+- **Al finalizar la firma ya no aparece un error de ubicación inexistente.** Si la lectura seguía en vuelo al pulsar finalizar, se mostraba el error de inmediato. Ahora el botón indica "Obteniendo ubicación..." y el envío continúa solo al llegar la coordenada; el error solo aparece tras un fallo real.
+- **Entrega de ubicación más rápida en interiores** (precisión a cien metros, suficiente para la constancia) y respaldo con la última ubicación conocida del sistema si la lectura falla.
 
 ## Novedades de la 1.9.0
 

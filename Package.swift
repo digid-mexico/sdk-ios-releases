@@ -12,8 +12,8 @@ let package = Package(
     targets: [
         .binaryTarget(
             name: "DigidSDK",
-            url: "https://github.com/digid-mexico/sdk-ios-releases/releases/download/1.9.0/DigidSDK-1.9.0.xcframework.zip",
-            checksum: "cb808eb5063ae7d8420e979a95450a6363841540c1a9fecb8ccc3934ee591007"
+            url: "https://github.com/digid-mexico/sdk-ios-releases/releases/download/1.10.0/DigidSDK-1.10.0.xcframework.zip",
+            checksum: "02978df54ee672c83773fbb7f2e7089b6a00b096884aac027384fb17d935cefb"
         ),
         .binaryTarget(
             name: "DiditSDKBinary",
