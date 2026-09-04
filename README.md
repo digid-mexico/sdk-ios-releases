@@ -10,7 +10,7 @@ El SDK se distribuye como un **XCFramework binario** vía Swift Package Manager.
 
 1. **File → Add Package Dependencies…**
 2. URL: `https://github.com/digid-mexico/sdk-ios-releases`
-3. Regla de versión: **Exact → 1.10.0** (o *Up to Next Major Version* desde 1.10.0).
+3. Regla de versión: **Exact → 1.11.0** (o *Up to Next Major Version* desde 1.11.0).
 4. Agrega el producto **DigidSDK** a tu *app target*.
 
 ### Opción B — Package.swift (proyectos SPM puros)
@@ -23,7 +23,7 @@ let package = Package(
     name: "MiApp",
     platforms: [.iOS(.v14)],
     dependencies: [
-        .package(url: "https://github.com/digid-mexico/sdk-ios-releases", exact: "1.10.0")
+        .package(url: "https://github.com/digid-mexico/sdk-ios-releases", exact: "1.11.0")
     ],
     targets: [
         .target(name: "MiApp", dependencies: [
@@ -72,7 +72,8 @@ Consulta el **Manual de Integración** para el detalle de los módulos KYC y de 
 
 | Versión | Fecha      | Novedades                                                                          |
 |---------|------------|------------------------------------------------------------------------------------|
-| 1.10.0  | 2026-08-19 | `DigidTheme.accentColor` para teñir las ilustraciones (opt-in). Al finalizar la firma se espera la lectura de ubicación en vuelo en vez de mostrar un error inmediato; entrega más rápida en interiores. Sin cambios breaking. **Versión recomendada.** |
+| 1.11.0  | 2026-09-04 | Motor de verificación interno actualizado. Sin cambios de API ni de integración: basta con subir la versión del paquete. Sin cambios breaking. **Versión recomendada.** |
+| 1.10.0  | 2026-08-19 | `DigidTheme.accentColor` para teñir las ilustraciones (opt-in). Al finalizar la firma se espera la lectura de ubicación en vuelo en vez de mostrar un error inmediato; entrega más rápida en interiores. Sin cambios breaking. |
 | 1.9.0   | 2026-08-11 | `isApproved` ahora exige que el servidor haya aprobado. Firma con ubicación (`required_gps`). Manifiesto de privacidad incluido. Corrige un cierre inesperado al capturar la selfie de firma. Pantallas del motor de verificación en español. |
 | 1.8.0   | 2026-08-03 | Pinch-zoom en la lectura del documento. La pantalla de T&C ahora la dicta el backend por cliente (sin cambios de integración). `addressData` agrega `municipio`, `colonia`, `numeroExterior`, `cruzamientos` y `parsingConfidence`. |
 | 1.7.0   | 2026-07-21 | `KYCResult.sessionId` devuelve el identificador que envía el integrador. Nuevo error `duplicateSessionId` cuando ese id ya se usó. |
@@ -81,6 +82,12 @@ Consulta el **Manual de Integración** para el detalle de los módulos KYC y de 
 | 1.4.0   | 2026-06    | Enriquecimiento del resultado KYC                                                  |
 
 > El historial completo está disponible en la pestaña **Releases** de este repositorio. Conserva siempre las versiones anteriores para clientes que fijen una versión específica.
+
+## Novedades de la 1.11.0
+
+### Motor de verificación interno actualizado
+
+Se actualiza el motor de verificación biométrica que usa el SDK. No cambia la API pública ni la integración: actualizar solo requiere subir la versión del paquete.
 
 ## Novedades de la 1.10.0
 
