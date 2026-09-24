@@ -10,7 +10,7 @@ El SDK se distribuye como un **XCFramework binario** vía Swift Package Manager.
 
 1. **File → Add Package Dependencies…**
 2. URL: `https://github.com/digid-mexico/sdk-ios-releases`
-3. Regla de versión: **Exact → 1.12.0** (o *Up to Next Major Version* desde 1.12.0).
+3. Regla de versión: **Exact → 1.13.0** (o *Up to Next Major Version* desde 1.13.0).
 4. Agrega el producto **DigidSDK** a tu *app target*.
 
 ### Opción B — Package.swift (proyectos SPM puros)
@@ -23,7 +23,7 @@ let package = Package(
     name: "MiApp",
     platforms: [.iOS(.v14)],
     dependencies: [
-        .package(url: "https://github.com/digid-mexico/sdk-ios-releases", exact: "1.12.0")
+        .package(url: "https://github.com/digid-mexico/sdk-ios-releases", exact: "1.13.0")
     ],
     targets: [
         .target(name: "MiApp", dependencies: [
@@ -72,7 +72,8 @@ Consulta el **Manual de Integración** para el detalle de los módulos KYC y de 
 
 | Versión | Fecha      | Novedades                                                                          |
 |---------|------------|------------------------------------------------------------------------------------|
-| 1.12.0  | 2026-09-18 | Contraste garantizado en los colores del tema: ningún `DigidTheme` puede dejar un elemento del SDK invisible por bajo contraste, se ajusta automáticamente. Sin cambios de API ni de integración. Sin cambios breaking. **Versión recomendada.** |
+| 1.13.0  | 2026-09-24 | Un resultado con `ready = false` ya no es un veredicto: si el servidor no responde a tiempo llega como `"Pending"`. Nuevos `renapo`, `lista_nominal` y `code` en los motivos de rechazo. Sin cambios de permisos, dependencias ni API existente. **Versión recomendada.** |
+| 1.12.0  | 2026-09-18 | Contraste garantizado en los colores del tema: ningún `DigidTheme` puede dejar un elemento del SDK invisible por bajo contraste, se ajusta automáticamente. Sin cambios de API ni de integración. Sin cambios breaking. |
 | 1.11.0  | 2026-09-04 | Motor de verificación interno actualizado. Sin cambios de API ni de integración: basta con subir la versión del paquete. Sin cambios breaking. |
 | 1.10.0  | 2026-08-19 | `DigidTheme.accentColor` para teñir las ilustraciones (opt-in). Al finalizar la firma se espera la lectura de ubicación en vuelo en vez de mostrar un error inmediato; entrega más rápida en interiores. Sin cambios breaking. |
 | 1.9.0   | 2026-08-11 | `isApproved` ahora exige que el servidor haya aprobado. Firma con ubicación (`required_gps`). Manifiesto de privacidad incluido. Corrige un cierre inesperado al capturar la selfie de firma. Pantallas del motor de verificación en español. |
@@ -83,6 +84,36 @@ Consulta el **Manual de Integración** para el detalle de los módulos KYC y de 
 | 1.4.0   | 2026-06    | Enriquecimiento del resultado KYC                                                  |
 
 > El historial completo está disponible en la pestaña **Releases** de este repositorio. Conserva siempre las versiones anteriores para clientes que fijen una versión específica.
+
+## Novedades de la 1.13.0
+
+### Un resultado con `ready = false` ya no es un veredicto
+
+Si el servidor no entrega el veredicto dentro del tiempo de espera (~60 s), el `KYCResult` llega con `ready = false`, `status = "Pending"` y `faceMatch`, `livenessCheck` y `documentValid` en `false`; `isApproved` devuelve `false`. Antes repetía el estado preliminar del análisis biométrico (por ejemplo `"Approved"` con `isApproved = true`), aunque el servidor todavía pudiera rechazar la verificación por las validaciones de RENAPO o de la lista nominal del INE.
+
+**Qué hacer:** si `ready` es `false`, no registres la verificación como aprobada ni como rechazada: consulta el resultado definitivo desde tu backend con el `sessionId` (Manual de Integración, sección 4.5). Una verificación en revisión manual (`status = "In Review"`) también llega con `ready = false`. El `message` de estos resultados ahora dice "Resultado pendiente: consulta el veredicto definitivo en el servidor."
+
+### RENAPO y lista nominal del INE en el resultado
+
+Para los clientes con estas validaciones activas, `KYCResult` agrega:
+
+- `renapo`: `status`, `code`, `validations` (`curp`, `full_name`, `date_of_birth`, `gender`, `curp_status`) y `data` (registro de RENAPO).
+- `lista_nominal`: `status` y `code`.
+- En `rejectionReasons`, cada motivo trae además `code` (por ejemplo `RENAPO_BAJA`), `status` y `risk`.
+
+Llevan los mismos nombres y valores que el JSON del servidor. `nil` indica que no hay una consulta guardada para esa verificación.
+
+```swift
+let curpStatus = result.renapo?.validations?.curp_status   // "active", "cancelled", "not_available"
+let credencial = result.lista_nominal?.status              // "vigente", "no_vigente", "no_encontrada"
+result.rejectionReasons?.forEach { print("\($0.code ?? "-"): \($0.message)") }
+```
+
+### Compatibilidad
+
+No cambia ningún permiso, dependencia ni API existente: actualizar solo requiere subir la versión del paquete, y si no usas los campos nuevos tu integración sigue igual (salvo el caso de `ready = false` descrito arriba).
+
+`toDictionary()` / `toJSON()` agregan las llaves `renapo` y `lista_nominal` (siempre presentes, `null` si no hubo consulta) y `status`/`code`/`risk` en cada motivo. Si tu backend deserializa ese JSON rechazando llaves desconocidas, configúralo para ignorarlas.
 
 ## Novedades de la 1.12.0
 
