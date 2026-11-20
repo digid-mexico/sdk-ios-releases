@@ -10,7 +10,7 @@ El SDK se distribuye como un **XCFramework binario** vía Swift Package Manager.
 
 1. **File → Add Package Dependencies…**
 2. URL: `https://github.com/digid-mexico/sdk-ios-releases`
-3. Regla de versión: **Exact → 1.13.0** (o *Up to Next Major Version* desde 1.13.0).
+3. Regla de versión: **Exact → 1.13.1** (o *Up to Next Major Version* desde 1.13.1).
 4. Agrega el producto **DigidSDK** a tu *app target*.
 
 ### Opción B — Package.swift (proyectos SPM puros)
@@ -23,7 +23,7 @@ let package = Package(
     name: "MiApp",
     platforms: [.iOS(.v14)],
     dependencies: [
-        .package(url: "https://github.com/digid-mexico/sdk-ios-releases", exact: "1.13.0")
+        .package(url: "https://github.com/digid-mexico/sdk-ios-releases", exact: "1.13.1")
     ],
     targets: [
         .target(name: "MiApp", dependencies: [
@@ -72,7 +72,8 @@ Consulta el **Manual de Integración** para el detalle de los módulos KYC y de 
 
 | Versión | Fecha      | Novedades                                                                          |
 |---------|------------|------------------------------------------------------------------------------------|
-| 1.13.0  | 2026-09-24 | Un resultado con `ready = false` ya no es un veredicto: si el servidor no responde a tiempo llega como `"Pending"`. Nuevos `renapo`, `lista_nominal` y `code` en los motivos de rechazo. Sin cambios de permisos, dependencias ni API existente. **Versión recomendada.** |
+| 1.13.1  | 2026-11-20 | La selfie y la INE de la firma se suben nítidas y con su proporción: antes llegaban reducidas a 96 × 96 puntos y se veían pixeleadas en el documento firmado. Sin cambios de API ni de integración: basta con subir la versión del paquete. Sin cambios breaking. **Versión recomendada.** |
+| 1.13.0  | 2026-09-24 | Un resultado con `ready = false` ya no es un veredicto: si el servidor no responde a tiempo llega como `"Pending"`. Nuevos `renapo`, `lista_nominal` y `code` en los motivos de rechazo. Sin cambios de permisos, dependencias ni API existente. |
 | 1.12.0  | 2026-09-18 | Contraste garantizado en los colores del tema: ningún `DigidTheme` puede dejar un elemento del SDK invisible por bajo contraste, se ajusta automáticamente. Sin cambios de API ni de integración. Sin cambios breaking. |
 | 1.11.0  | 2026-09-04 | Motor de verificación interno actualizado. Sin cambios de API ni de integración: basta con subir la versión del paquete. Sin cambios breaking. |
 | 1.10.0  | 2026-08-19 | `DigidTheme.accentColor` para teñir las ilustraciones (opt-in). Al finalizar la firma se espera la lectura de ubicación en vuelo en vez de mostrar un error inmediato; entrega más rápida en interiores. Sin cambios breaking. |
@@ -84,6 +85,18 @@ Consulta el **Manual de Integración** para el detalle de los módulos KYC y de 
 | 1.4.0   | 2026-06    | Enriquecimiento del resultado KYC                                                  |
 
 > El historial completo está disponible en la pestaña **Releases** de este repositorio. Conserva siempre las versiones anteriores para clientes que fijen una versión específica.
+
+## Novedades de la 1.13.1
+
+### La selfie y la INE salen nítidas en el documento firmado
+
+Las fotos que el SDK sube para la firma (la selfie de `DigidSelfieCaptureViewController` y la selfie y la INE de `DigidSignatureCaptureViewController` y `DigidSignatureService.uploadImages`) se reducían a un cuadrado de 96 × 96 puntos. En la hoja de evidencias del documento firmado se veían pixeleadas y la credencial aparecía deformada.
+
+Ahora se suben en JPEG con su proporción original y hasta 1000 px por lado, sin depender de la escala de la pantalla, suficiente para que se impriman nítidas. Una foto más chica se envía tal cual, sin agrandarla. La firma no cambia: ya se enviaba completa.
+
+### Compatibilidad
+
+No cambia ninguna API, permiso ni dependencia: basta con subir la versión del paquete. Cada foto pesa unos cientos de KB en lugar de unos pocos, así que la subida puede tardar un poco más en conexiones lentas. Los documentos firmados antes de actualizar no cambian.
 
 ## Novedades de la 1.13.0
 
